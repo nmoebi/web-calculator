@@ -6,7 +6,7 @@ let solution;
 let negated = false;
 
 let directInputs = ["0","1","2","3","4","5","6","7","8","9","."]
-let numericalOps = ["add","mult","divi","subt"];
+let numericalOps = ["+","-","*","/"];
 
 let calcText = document.querySelector(".calcText");
 let inputMarker = document.querySelector(".inputMarker");
@@ -46,7 +46,7 @@ let buttonAction = function(button) {
             appendAns();
             break;
 
-        case "calc":
+        case "=":
             solveEquation();
             break;
     }
@@ -78,13 +78,17 @@ let updateOperand = function(input) {
     else if(number1 === "" && input === "+")
         inputValue(input);
     
-    else operand = input;
+    else if (number1 != "+" && number1 != "-") 
+        operand = input;
 
     updateCalcText();
 }
 
 //updates the equation on the calculator-screen
 let updateCalcText = function() {
+
+    setInputMarker();
+    toggleInputMarker();
 
     if(number2 === "" && operand === "") {
         if(negated)
@@ -96,17 +100,10 @@ let updateCalcText = function() {
             calcText.textContent = `-(${number1} ${operand} ${number2}`
         else calcText.textContent = `${number1} ${operand} ${number2}`;
     }
-    if(calcText.textContent.length > 23) {
-        calcText.textContent = ".." + calcText.textContent.slice(-24,-1);
-    }
-    console.log(calcText.textContent.length);
-} 
 
-//negates the expression - input marker fix needed here for negated values!
-let negate = function() {
-    negated = !negated;
-    toggleInputMarker();
-}
+    if(calcText.textContent.length > 23)
+        calcText.textContent = ".." + calcText.textContent.slice(-24,-1);
+} 
 
 //delete the last input
 let deleteLast = function() {
@@ -127,16 +124,28 @@ let resetEquation = function() {
     number2 = "";
     operand = "";
     negated = false;
-    toggleInputMarker();
+    updateCalcText();
+}
+
+//negates the expression - input marker fix needed here for negated values!
+let negate = function() {
+    negated = !negated;
     updateCalcText();
 }
 
 //calculates the solution of the equation on the screen
 let solveEquation = function() {
+    //removing negation for easier string evaluation
+    let wasNegated = negated;;
+    if(wasNegated) {
+        negate();
+    }
 
     if(operand === "" && number2 === "") {
-        solution = number1;
-        updateSolution();
+        if(!(number1 === ans && !wasNegated)) {
+            solution = +(number1);
+            updateSolution(wasNegated);
+        }
     }
     else {
         let rawEquation = calcText.textContent;
@@ -151,34 +160,39 @@ let solveEquation = function() {
 
         switch(op) {
             case "+":
-                solution = num1 + num2;
+                solution = +(num1 + num2);
                 break;
             
             case "-": 
-                solution = num1 - num2;
+                solution = +(num1 - num2);
                 break;
 
             case "*":
-                solution = num1 * num2;
+                solution = +(num1 * num2);
                 break;
 
             case "/":
-                solution = num1 / num2;
+                solution = +(num1 / num2);
                 break;
         }
-        updateSolution();
+        updateSolution(wasNegated);
     }
 }
 
 //updates and resets values after solutions are calculated
-let updateSolution = function() {
-    if(negated)
+let updateSolution = function(wasNegated) {
+    if(wasNegated) {
         solution = -solution;
+    }
 
+    //rounds solution to 5 decimal places and removes tailing zeros
+    //converts solution to String after
+    solution = "" + parseFloat((solution).toFixed(5));
+
+    //update content on screen
     resetEquation();
-    toggleInputMarker();
-    ans = "" + solution;
-    number1 = "" + solution;
+    ans = solution;
+    number1 = solution;
     updateCalcText();
 }
 
@@ -235,3 +249,29 @@ let toggleInputMarker = function() {
 
 //calls toggleInputMarker() every 600ms
 let markerInterval = window.setInterval(toggleInputMarker, 600);
+
+window.addEventListener("keydown", (event) => {
+    let key = event.key;
+
+    if(directInputs.includes(key)) 
+        inputValue(key);
+
+    else if(numericalOps.includes(key)) {
+        if(key === "*")
+            updateOperand("×");
+        else updateOperand(key);
+    }
+    else if(key === ",")
+        inputValue(".");
+
+    else if (key === "Backspace")
+        deleteLast();
+
+    else if(key === "=" || key === "Enter") {
+        event.preventDefault();
+        solveEquation();
+    }
+
+    else if(key === "n")
+        negate();
+});
