@@ -148,9 +148,9 @@ let solveEquation = function() {
         }
     }
     else {
-        let rawEquation = calcText.textContent;
+        let rawEquation = `${number1} ${operand} ${number2}`;
     
-        let equation = calcText.textContent.replace("×", "*").replace("÷","/").replace("-(","").replace(")","");
+        let equation = rawEquation.replace("×", "*").replace("÷","/").replace("-(","").replace(")","");
 
         let values = equation.split(" ");
         let op = values[1];
