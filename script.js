@@ -26,7 +26,7 @@ let buttonAction = function(button) {
         inputValue(btnID);
 
     else if(numericalOps.includes(btnID))
-        updateOperator(button.textContent);
+        updateOperand(button.textContent);
 
     else switch(btnID) {
         case "neg": 
@@ -34,12 +34,16 @@ let buttonAction = function(button) {
             updateCalcText();
             break;
 
+        case "del":
+            deleteLast();
+            break;
+
         case "ac":
             resetEquation();
             break;
 
         case "ans": 
-            inputValue(ans);
+            appendAns();
             break;
 
         case "calc":
@@ -62,24 +66,34 @@ let inputValue = function(input) {
     updateCalcText();
 }
 
-let updateOperator = function(input) {
+let updateOperand = function(input) {
     //number1 = "0" is auto-added in case an operator is chosen before there is an numerical input
-    if(number1 === "")
+    if(number1 === "" && input != "-" && input != "+") {
         number1 = "0";
-    operand = input;
+        operand = input;
+    }
+    else if(number1 === "" && input === "-")
+        inputValue(input);
+
+    else if(number1 === "" && input === "+")
+        inputValue(input);
+    
+    else operand = input;
+
     updateCalcText();
 }
 
 //updates the equation on the calculator-screen
 let updateCalcText = function() {
+
     if(number2 === "" && operand === "") {
         if(negated)
-            calcText.textContent = `-(${number1})`
+            calcText.textContent = `-(${number1}`
         else calcText.textContent = `${number1}`;
     }
     else {
         if(negated)
-            calcText.textContent = `-(${number1} ${operand} ${number2})`
+            calcText.textContent = `-(${number1} ${operand} ${number2}`
         else calcText.textContent = `${number1} ${operand} ${number2}`;
     }
 } 
@@ -87,6 +101,20 @@ let updateCalcText = function() {
 //negates the expression - input marker fix needed here for negated values!
 let negate = function() {
     negated = !negated;
+    toggleInputMarker();
+}
+
+//delete the last input
+let deleteLast = function() {
+    if(number2 === "" && operand === "")
+        number1 = number1.slice(0,-1);
+
+    else if (number2 === "")
+        operand = "";
+    
+    else number2 = number2.slice(0,-1);
+    
+    updateCalcText();
 }
 
 //resets all input-values and clears the text
@@ -95,9 +123,11 @@ let resetEquation = function() {
     number2 = "";
     operand = "";
     negated = false;
+    toggleInputMarker();
     updateCalcText();
 }
 
+//calculates the solution of the equation on the screen
 let solveEquation = function() {
 
     if(operand === "" && number2 === "") {
@@ -135,26 +165,67 @@ let solveEquation = function() {
     }
 }
 
+//updates and resets values after solutions are calculated
 let updateSolution = function() {
     if(negated)
         solution = -solution;
 
     resetEquation();
-    ans = solution;
-    number1 = solution;
+    toggleInputMarker();
+    ans = "" + solution;
+    number1 = "" + solution;
     updateCalcText();
+}
+
+//appends last solution to equation
+let appendAns = function() {
+    if(ans>=0 || number1 === "")
+        inputValue(ans);
+    else {
+        if(number2 === "" && operand === "") {
+            updateOperand("-");
+            number2 = -ans;
+        }
+        else if(number2 != "") {
+            number2 -= ans;
+        }
+        updateCalcText();
+    }
+}
+
+let setInputMarker = function() {
+    if(negated) {
+        inputMarker.textContent = "|)";
+    }
+    else inputMarker.textContent = "|";
 }
 
 //lets the input marker line fade in and out
 let toggleInputMarker = function() {
-    if(inputMarker.textContent === "") {
-        inputMarker.style.marginRight = "15px";
-        inputMarker.textContent = "|"
-    } 
+    if(negated) {
+        if(inputMarker.textContent === "|)") {
+            inputMarker.style.marginRight = "12px";
+            inputMarker.textContent = "  )";
+            inputMarker.style.marginLeft = "18px";
+        } 
+        else {
+            inputMarker.style.marginRight = "12px";
+            inputMarker.style.marginLeft = "0px";
+            inputMarker.textContent = "|)";
+        }  
+    }
     else {
-        inputMarker.style.marginRight = "30px";
-        inputMarker.textContent = ""
-    }     
+        if(inputMarker.textContent === "") {
+            inputMarker.style.marginRight = "12px";
+            inputMarker.style.marginLeft = "0px";
+            inputMarker.textContent = "|";
+        } 
+        else {
+            inputMarker.style.marginRight = "30px";
+            inputMarker.style.marginLeft = "0px";
+            inputMarker.textContent = "";
+        }  
+    }   
 }
 
 //calls toggleInputMarker() every 600ms
