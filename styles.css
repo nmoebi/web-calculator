@@ -38,11 +38,23 @@ body {
     width: 36em;
     height: 36em;
     padding: 0 0 2em 0;
-    background-color: #585858;
+    background-color: #545454;
     box-shadow: inset 0px 0px 6px 0px rgb(42, 42, 42);
 }
 
+.calcText {
+    font-size: 30px;
+}
+
+.inputMarker {
+    font-size: 25px;
+    margin-right: 20px;
+}
+
 .screen {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
     width: 32em;
     height: 10em;
     margin-top: 2em;
@@ -88,7 +100,6 @@ button {
     padding: 0px;
     margin: 0px;
 
-    font-size: 26px;
     border: 0px;
     border-radius: 10px;
     outline: 1px solid black;
