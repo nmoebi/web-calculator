@@ -96,6 +96,10 @@ let updateCalcText = function() {
             calcText.textContent = `-(${number1} ${operand} ${number2}`
         else calcText.textContent = `${number1} ${operand} ${number2}`;
     }
+    if(calcText.textContent.length > 23) {
+        calcText.textContent = ".." + calcText.textContent.slice(-24,-1);
+    }
+    console.log(calcText.textContent.length);
 } 
 
 //negates the expression - input marker fix needed here for negated values!
@@ -143,6 +147,7 @@ let solveEquation = function() {
         let op = values[1];
         let num1 = +values[0];
         let num2 = +values[2];
+
 
         switch(op) {
             case "+":
